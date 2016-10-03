@@ -32,21 +32,22 @@ def secondAttempt(trainDataFile, devDataFile):
         if isfile(pickleFileName):
             print("Unpickling from {}".format(pickleFileName))
             with open(pickleFileName, 'rb') as f:
-                instances, labels = pickle.load(f)
+                instances, labels, classes = pickle.load(f)
         # Otherwise read in the data, process it and pickle it for later.
         else:
             print("Reading in data file {}".format(dataFile))
             dataset = arff.load(open(dataFile, 'r'))
             data = dataset['data']
+            classes = dataset["attributes"][-1][-1]
 
             print("Processing data file {}".format(dataFile))
             instances, labels = processData(data)
 
             print("Pickling instances/labels data to {}".format(pickleFileName))
             with open(pickleFileName, 'wb') as f:
-                pickle.dump((instances, labels), f)
+                pickle.dump((instances, labels, classes), f)
 
-        return (instances, labels)
+        return (instances, labels, classes)
 
 
     def processData(data):
@@ -86,7 +87,7 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     startTime = time.time()
 
-    instances, labels = readDataFile(trainDataFile)
+    instances, labels, classes = readDataFile(trainDataFile)
 
     print("Training the model")
     clf = MultinomialNB()
@@ -101,12 +102,14 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     startTime = time.time()
 
-    instances, labels = readDataFile(devDataFile)
+    # Throw away the classes, we've already read them in.
+    instances, labels, _ = readDataFile(devDataFile)
 
     print("Testing the model")
     numCorrect = 0
     numWrong  = 0
     lenInstances = len(instances)
+    predicted = []
     for i in range(lenInstances):
         # Status update of how it's going.
         if i % 1000 == 0:
@@ -114,14 +117,24 @@ def secondAttempt(trainDataFile, devDataFile):
         instance = instances[i]
         label = labels[i]
         res = predictPrint(clf, instance)
+        predicted.append(res)
         # print("-- Predicted label: {} || Correct label: {} --". format(res, label))
         if res == label:
             numCorrect += 1
         else:
             numWrong += 1
 
+    predicted = np.array(predicted)
+
     timeForTest = time.time() - startTime
     numDevInstances = len(instances)
+
+
+    """
+    Printing various evaluation metrics.
+    """
+    report = classification_report(labels, predicted, target_names=classes)
+    print(report)
 
     print("Number of training instances: {}".format(numTrainInstances))
     print("Number of dev instances: {}".format(numDevInstances))
