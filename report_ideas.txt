@@ -1,6 +1,29 @@
 Look at the results of instances where all features are not present (zero) in the feature vector. Did the classifier classify them correctly? If yes, was it just dumb luck? If no, why? Consider using their ID to find the real tweet and seeing which words that weren't used as features could indicate the correct class. Following this, discuss the trade off when using fewer features. Because it's so fast, look into using more features and seeing if the results (accuracy, precision, recall?) change.
 
-Best35
-Number of correct classifications: 64804
-Number of wrong classifications: 150076
-Percentage of correct classifications: 43.18%
+Best35 Pre-Pickle
+Number of correct classifications: 21005
+Number of wrong classifications: 47527
+Percentage of correct classifications: 44.20%
+Time taken to train the model: 16.39 sec
+Time taken to test the model: 9.19 sec
+
+Best35 Post-Pickle
+Number of correct classifications: 21005
+Number of wrong classifications: 47527
+Percentage of correct classifications: 44.20%
+Time taken to train the model: 0.31 sec
+Time taken to test the model: 3.87 sec
+
+Best446 Pre-Pickle
+Number of correct classifications: 22633
+Number of wrong classifications: 45899
+Percentage of correct classifications: 49.31%
+Time taken to train the model: 267.04 sec
+Time taken to test the model: 67.68 sec
+
+Best446 Post-Pickle
+Number of correct classifications: 22633
+Number of wrong classifications: 45899
+Percentage of correct classifications: 49.31%
+Time taken to train the model: 4.03 sec
+Time taken to test the model: 5.20 sec

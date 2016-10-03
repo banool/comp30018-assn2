@@ -4,6 +4,8 @@
 
 import arff
 import numpy as np
+from os.path import isfile
+import pickle
 from sklearn.naive_bayes import MultinomialNB
 import time
 
@@ -15,20 +17,43 @@ dev446F = "best446/dev-best446.arff"
 
 def secondAttempt(trainDataFile, devDataFile):
 
-    def predictPrint(clf, instance, diagnostic=False):
-        if diagnostic:
-            print("Features present in instance: ")
-            for i in range(len(instance)):
-                if instance[i] == 1:
-                    print(attributes[i], end=' ')
-            print()
+    def readDataFile(dataFile):
+        """
+        Checks if pickle already exists, and if so loads it.
+        Otherwise reads in the arff data and processes it accordingly.
+        It then dumps the instances and labels tuple to a pickle file.
+        """
+        pickleFileName = dataFile.split(".")[:-1]
+        pickleFileName.append(".p")
+        pickleFileName = "".join(pickleFileName)
 
-        return clf.predict([instance])
+        # If instances and labels data exist already, unpickle it.
+        if isfile(pickleFileName):
+            print("Unpickling from {}".format(pickleFileName))
+            with open(pickleFileName, 'rb') as f:
+                instances, labels = pickle.load(f)
+        # Otherwise read in the data, process it and pickle it for later.
+        else:
+            print("Reading in data file {}".format(dataFile))
+            dataset = arff.load(open(dataFile, 'r'))
+            data = dataset['data']
 
-    # Returns instances and labels.
+            print("Processing data file {}".format(dataFile))
+            instances, labels = processData(data)
+
+            print("Pickling instances/labels data to {}".format(pickleFileName))
+            with open(pickleFileName, 'wb') as f:
+                pickle.dump((instances, labels), f)
+
+        return (instances, labels)
+
+
     def processData(data):
+        """
+        Returns instances and labels in separate numpy arrays.
+        """
         instances, labels = [], []
-        for i in trainingData:
+        for i in data:
             instance = i[1:-1]
             label = i[-1]
             instances.append(instance)
@@ -40,18 +65,27 @@ def secondAttempt(trainDataFile, devDataFile):
         return (instances, labels)
 
 
+    def predictPrint(clf, instance, diagnostic=False):
+        """
+        Returns the predicted class for an instance according to the model.
+        Has an option to print which features are present in the instance.
+        """
+        if diagnostic:
+            print("Features present in instance: ")
+            for i in range(len(instance)):
+                if instance[i] == 1:
+                    print(attributes[i], end=' ')
+            print()
+
+        return clf.predict([instance])
+
+
     """
     Creating and training the model.
     """
     startTime = time.time()
 
-    print("Reading in training data {}".format(trainDataFile))
-    trainingDataset = arff.load(open(trainDataFile, 'r'))
-
-    trainingData = trainingDataset['data']
-
-    print("Processing training data")
-    instances, labels = processData(trainingData)
+    instances, labels = readDataFile(trainDataFile)
 
     print("Training the model")
     clf = MultinomialNB()
@@ -70,22 +104,16 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     startTime = time.time()
 
-    print("Reading in test data {}".format(devDataFile))
-    devDataset = arff.load(open(devDataFile, 'r'))
-
-    devData = devDataset['data']
-    attributes = [i[0] for i in devDataset["attributes"][1:-1]]
-
-    print("Processing test data")
-    instances, labels = processData(devData)
+    instances, labels = readDataFile(devDataFile)
 
     print("Testing the model")
     numCorrect = 0
     numWrong  = 0
-    for i in range(len(instances)):
+    lenInstances = len(instances)
+    for i in range(lenInstances):
         # Status update of how it's going.
-        if i % 100 == 0:
-            print(str(i).zfill(6) + "/" + str(len(instances)))
+        if i % 1000 == 0:
+            print(str(i).zfill(len(str(lenInstances))) + "/" + str(lenInstances))
         instance = instances[i]
         label = labels[i]
         res = predictPrint(clf, instance)
@@ -150,4 +178,4 @@ def firstAttempt():
     predictPrint(clf, data[0])
 
 if __name__ == "__main__":
-    secondAttempt(train35F, dev35F)
+    secondAttempt(train446F, dev446F)
