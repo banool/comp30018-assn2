@@ -7,9 +7,9 @@ import numpy as np
 from sklearn.naive_bayes import MultinomialNB
 
 train35F = "best35/train-best35.arff"
-test35F  = "best35/dev-best35.arff"
+dev35F  = "best35/dev-best35.arff"
 
-def secondAttempt():
+def secondAttempt(trainDataFile, devDataFile):
 
     def predictPrint(clf, instance, diagnostic=False):
         if diagnostic:
@@ -39,8 +39,8 @@ def secondAttempt():
     """
     Creating and training the model.
     """
-    print("Reading in training data {}".format(train35F))
-    trainingDataset = arff.load(open(train35F, 'r'))
+    print("Reading in training data {}".format(trainDataFile))
+    trainingDataset = arff.load(open(trainDataFile, 'r'))
 
     trainingData = trainingDataset['data']
 
@@ -49,8 +49,8 @@ def secondAttempt():
     clf = MultinomialNB()
     clf.fit(instances, labels)
 
-    print(type(instances[0]))
-    print(predictPrint(clf, instances[0]))
+    #print(type(instances[0]))
+    #print(predictPrint(clf, instances[0]))
 
 
 
@@ -58,8 +58,8 @@ def secondAttempt():
     """
     Testing and evaluating the model
     """
-    print("Reading in test data {}".format(test35F))
-    devDataset = arff.load(open(train35F, 'r'))
+    print("Reading in test data {}".format(devDataFile))
+    devDataset = arff.load(open(devDataFile, 'r'))
 
     devData = devDataset['data']
     attributes = [i[0] for i in devDataset["attributes"][1:-1]]
@@ -132,4 +132,4 @@ def firstAttempt():
     predictPrint(clf, data[0])
 
 if __name__ == "__main__":
-    secondAttempt()
+    secondAttempt(train35F, dev35F)
