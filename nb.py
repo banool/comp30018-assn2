@@ -7,6 +7,7 @@ import numpy as np
 from os.path import isfile
 import pickle
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
 import time
 
 train35F = "best35/train-best35.arff"
@@ -92,11 +93,7 @@ def secondAttempt(trainDataFile, devDataFile):
     clf.fit(instances, labels)
 
     timeForTrain = time.time() - startTime
-
-    #print(type(instances[0]))
-    #print(predictPrint(clf, instances[0]))
-
-
+    numTrainInstances = len(instances)
 
 
     """
@@ -124,58 +121,20 @@ def secondAttempt(trainDataFile, devDataFile):
             numWrong += 1
 
     timeForTest = time.time() - startTime
+    numDevInstances = len(instances)
+
+    print("Number of training instances: {}".format(numTrainInstances))
+    print("Number of dev instances: {}".format(numDevInstances))
+    print()
 
     print("Number of correct classifications: {}".format(numCorrect))
     print("Number of wrong classifications: {}".format(numWrong))
-    print("Percentage of correct classifications: {0:.2f}%".format(numCorrect*100/numWrong))
+    print("Percentage of correct classifications: {0:.2f}%".format(numCorrect*100/(numCorrect+numWrong)))
+    print()
+
     print("Time taken to train the model: {0:.2f} sec".format(timeForTrain))
     print("Time taken to test the model: {0:.2f} sec".format(timeForTest))
-
-
-
-
-
-
-def firstAttempt():
-    print("Reading in arff file {}".format(train35F))
-    dataset = arff.load(open(train35F, 'r'))
-    # Dataset has these keys: 'data', 'relation', 'attributes', 'description'
-    classes = np.array(dataset["attributes"][-1][1])
-    classes = classes.reshape((5, 1))
-    print(classes)
-    for i in classes:
-        print(i)
-
-    attributes = [i[1] for i in dataset["attributes"][1:-1]]
-
-    print(classes)
-    print("Converting to numpy array")
-    data = np.array(dataset['data'])
-    clf = MultinomialNB()
-
-    #data = np.random.randint(2, size=(5, 100))
-
-    from collections import Counter
-
-    # print(Counter([len(i) for i in data]))
-    # The above line verifies that all instance lines have the same length.
-
-    print(data.shape, classes.shape)
-    clf.fit(data[:-1], data)
-
-    print("Printing data")
-    print(data)
-
-    def predictPrint(clf, instance):
-        """
-        for i in range(1, len(instance - 2)):
-            if instance[i] == 1:
-                print(attributes[i], end=' ')
-        print()
-        """
-        print(clf.predict([instance]))
-
-    predictPrint(clf, data[0])
+    print()
 
 if __name__ == "__main__":
-    secondAttempt(train446F, dev446F)
+    secondAttempt(train35F, dev35F)
