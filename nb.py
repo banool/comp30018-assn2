@@ -5,9 +5,13 @@
 import arff
 import numpy as np
 from sklearn.naive_bayes import MultinomialNB
+import time
 
 train35F = "best35/train-best35.arff"
 dev35F  = "best35/dev-best35.arff"
+
+train446F = "best446/train-best446.arff"
+dev446F = "best446/dev-best446.arff"
 
 def secondAttempt(trainDataFile, devDataFile):
 
@@ -39,15 +43,21 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     Creating and training the model.
     """
+    startTime = time.time()
+
     print("Reading in training data {}".format(trainDataFile))
     trainingDataset = arff.load(open(trainDataFile, 'r'))
 
     trainingData = trainingDataset['data']
 
+    print("Processing training data")
     instances, labels = processData(trainingData)
 
+    print("Training the model")
     clf = MultinomialNB()
     clf.fit(instances, labels)
+
+    timeForTrain = time.time() - startTime
 
     #print(type(instances[0]))
     #print(predictPrint(clf, instances[0]))
@@ -58,14 +68,18 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     Testing and evaluating the model
     """
+    startTime = time.time()
+
     print("Reading in test data {}".format(devDataFile))
     devDataset = arff.load(open(devDataFile, 'r'))
 
     devData = devDataset['data']
     attributes = [i[0] for i in devDataset["attributes"][1:-1]]
 
+    print("Processing test data")
     instances, labels = processData(devData)
 
+    print("Testing the model")
     numCorrect = 0
     numWrong  = 0
     for i in range(len(instances)):
@@ -81,9 +95,13 @@ def secondAttempt(trainDataFile, devDataFile):
         else:
             numWrong += 1
 
+    timeForTest = time.time() - startTime
+
     print("Number of correct classifications: {}".format(numCorrect))
     print("Number of wrong classifications: {}".format(numWrong))
     print("Percentage of correct classifications: {0:.2f}%".format(numCorrect*100/numWrong))
+    print("Time taken to train the model: {0:.2f} sec".format(timeForTrain))
+    print("Time taken to test the model: {0:.2f} sec".format(timeForTest))
 
 
 
