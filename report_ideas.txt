@@ -1,29 +1,58 @@
 Look at the results of instances where all features are not present (zero) in the feature vector. Did the classifier classify them correctly? If yes, was it just dumb luck? If no, why? Consider using their ID to find the real tweet and seeing which words that weren't used as features could indicate the correct class. Following this, discuss the trade off when using fewer features. Because it's so fast, look into using more features and seeing if the results (accuracy, precision, recall?) change.
 
+Note the recall, why is the recall for SD so freakishly large compared to the other classes, as well as the F1-score being much higher. Why is the precision lower accordingly? Note that in 446, this effect is diminished, why?
+
 Best35 Pre-Pickle
-Number of correct classifications: 21005
-Number of wrong classifications: 47527
-Percentage of correct classifications: 44.20%
-Time taken to train the model: 16.39 sec
-Time taken to test the model: 9.19 sec
+
+Time taken to train the model: 14.18 sec
+Time taken to test the model: 8.14 sec
 
 Best35 Post-Pickle
+
+             precision    recall  f1-score   support
+
+          B       0.76      0.06      0.12     12061
+          H       0.54      0.08      0.14     12578
+         SD       0.28      0.97      0.43     17929
+         Se       0.91      0.05      0.10     14482
+          W       0.58      0.09      0.16     11482
+
+avg / total       0.60      0.31      0.21     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
 Number of correct classifications: 21005
 Number of wrong classifications: 47527
-Percentage of correct classifications: 44.20%
-Time taken to train the model: 0.31 sec
-Time taken to test the model: 3.87 sec
+Percentage of correct classifications: 30.65%
+
+Time taken to train the model: 0.46 sec
+Time taken to test the model: 3.77 sec
 
 Best446 Pre-Pickle
-Number of correct classifications: 22633
-Number of wrong classifications: 45899
-Percentage of correct classifications: 49.31%
-Time taken to train the model: 267.04 sec
-Time taken to test the model: 67.68 sec
+
+Time taken to train the model: 224.35 sec
+Time taken to test the model: 49.74 sec
 
 Best446 Post-Pickle
+
+             precision    recall  f1-score   support
+
+          B       0.44      0.10      0.17     12061
+          H       0.44      0.16      0.24     12578
+         SD       0.29      0.79      0.43     17929
+         Se       0.37      0.19      0.25     14482
+          W       0.51      0.20      0.29     11482
+
+avg / total       0.40      0.33      0.29     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
 Number of correct classifications: 22633
 Number of wrong classifications: 45899
-Percentage of correct classifications: 49.31%
-Time taken to train the model: 4.03 sec
-Time taken to test the model: 5.20 sec
+Percentage of correct classifications: 33.03%
+
+Time taken to train the model: 4.41 sec
+Time taken to test the model: 5.17 sec
+

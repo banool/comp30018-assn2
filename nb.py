@@ -1,11 +1,18 @@
 #!/usr/local/bin/python3
 
+"""
+Author:     Daniel Porteous
+Student #:  696965
+Login:      porteousd
+"""
+
 # Note, arff won't work with python 3.5, you need 3.4
 
 import arff
 import numpy as np
 from os.path import isfile
 import pickle
+from random import shuffle
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
 import time
@@ -37,7 +44,9 @@ def secondAttempt(trainDataFile, devDataFile):
         else:
             print("Reading in data file {}".format(dataFile))
             dataset = arff.load(open(dataFile, 'r'))
+
             data = dataset['data']
+            # shuffle(data) <- This doesn't affect the results. Why?
             classes = dataset["attributes"][-1][-1]
 
             print("Processing data file {}".format(dataFile))
@@ -113,7 +122,7 @@ def secondAttempt(trainDataFile, devDataFile):
     for i in range(lenInstances):
         # Status update of how it's going.
         if i % 1000 == 0:
-            print(str(i).zfill(len(str(lenInstances))) + "/" + str(lenInstances))
+            print("\r" + str(i).zfill(len(str(lenInstances))) + "/" + str(lenInstances) + " ", end="")
         instance = instances[i]
         label = labels[i]
         res = predictPrint(clf, instance)
@@ -133,6 +142,7 @@ def secondAttempt(trainDataFile, devDataFile):
     """
     Printing various evaluation metrics.
     """
+    print()
     report = classification_report(labels, predicted, target_names=classes)
     print(report)
 
