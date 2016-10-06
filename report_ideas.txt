@@ -7,6 +7,11 @@ Best35 Pre-Pickle
 Time taken to train the model: 14.18 sec
 Time taken to test the model: 8.14 sec
 
+Best446 Pre-Pickle
+
+Time taken to train the model: 224.35 sec
+Time taken to test the model: 49.74 sec
+
 Best35 Post-Pickle
 
              precision    recall  f1-score   support
@@ -28,11 +33,6 @@ Percentage of correct classifications: 30.65%
 
 Time taken to train the model: 0.46 sec
 Time taken to test the model: 3.77 sec
-
-Best446 Pre-Pickle
-
-Time taken to train the model: 224.35 sec
-Time taken to test the model: 49.74 sec
 
 Best446 Post-Pickle
 
@@ -56,3 +56,122 @@ Percentage of correct classifications: 33.03%
 Time taken to train the model: 4.41 sec
 Time taken to test the model: 5.17 sec
 
+
+
+
+
+Best 35 SVM
+
+             precision    recall  f1-score   support
+
+          B       0.76      0.06      0.12     12061
+          H       0.54      0.08      0.14     12578
+         SD       0.28      0.97      0.43     17929
+         Se       0.91      0.05      0.10     14482
+          W       0.58      0.09      0.16     11482
+
+avg / total       0.60      0.31      0.21     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
+Number of correct classifications: 21003
+Number of wrong classifications: 47529
+Percentage of correct classifications: 30.65%
+
+Time taken to train the model: 163.55 sec
+Time taken to test the model: 5.03 sec
+
+
+Best 446 SVM
+
+             precision    recall  f1-score   support
+
+          B       0.61      0.09      0.16     12061
+          H       0.44      0.15      0.23     12578
+         SD       0.29      0.90      0.43     17929
+         Se       0.69      0.09      0.16     14482
+          W       0.54      0.19      0.29     11482
+
+avg / total       0.50      0.33      0.27     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
+Number of correct classifications: 22679
+Number of wrong classifications: 45853
+Percentage of correct classifications: 33.09%
+
+Time taken to train the model: 297.31 sec
+Time taken to test the model: 5.76 sec
+
+Best 35 NB w/ AdaBoost: clf = AdaBoostClassifier(clf)
+
+             precision    recall  f1-score   support
+
+          B       0.92      0.04      0.08     12061
+          H       0.97      0.01      0.01     12578
+         SD       0.27      1.00      0.42     17929
+         Se       0.96      0.04      0.07     14482
+          W       0.71      0.00      0.01     11482
+
+avg / total       0.73      0.28      0.14     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
+Number of correct classifications: 19010
+Number of wrong classifications: 49522
+Percentage of correct classifications: 27.74%
+
+Time taken to train the model: 17.61 sec
+Time taken to test the model: 330.42 sec
+
+Best 35 AdaBoost alone: clf = AdaBoostClassifier()
+
+             precision    recall  f1-score   support
+
+          B       0.76      0.06      0.12     12061
+          H       0.54      0.08      0.14     12578
+         SD       0.28      0.97      0.43     17929
+         Se       0.91      0.05      0.10     14482
+          W       0.62      0.09      0.16     11482
+
+avg / total       0.60      0.31      0.21     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
+Number of correct classifications: 21005
+Number of wrong classifications: 47527
+Percentage of correct classifications: 30.65%
+
+Time taken to train the model: 14.60 sec
+Time taken to test the model: 292.05 sec
+
+Best 35 SVM /w Adaboost: clf = AdaBoostClassifier(clf, algorithm="SAMME")
+
+             precision    recall  f1-score   support
+
+          B       0.76      0.06      0.12     12061
+          H       0.54      0.08      0.14     12578
+         SD       0.28      0.97      0.43     17929
+         Se       0.91      0.05      0.10     14482
+          W       0.58      0.09      0.16     11482
+
+avg / total       0.60      0.31      0.21     68532
+
+Number of training instances: 214880
+Number of dev instances: 68532
+
+Number of correct classifications: 21003
+Number of wrong classifications: 47529
+Percentage of correct classifications: 30.65%
+
+Time taken to train the model: 577.88 sec
+Time taken to test the model: 15.27 sec
+
+
+
+
+This report analyses how different classifiers handle being trained with increasing numbers of features. For the two classifiers in question, Naive Bayes and Support Vector Machine (SVM), their performance is evaluated and their weaknesses are highlighted. Finally, various methods to improve their performance are explored, namely boosting for Naive Bayes and kernel selection for SVM.

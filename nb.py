@@ -14,7 +14,9 @@ from os.path import isfile
 import pickle
 from random import shuffle
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
 from sklearn.metrics import classification_report
+from sklearn.ensemble import AdaBoostClassifier
 import time
 
 train35F = "best35/train-best35.arff"
@@ -23,7 +25,7 @@ dev35F  = "best35/dev-best35.arff"
 train446F = "best446/train-best446.arff"
 dev446F = "best446/dev-best446.arff"
 
-def secondAttempt(trainDataFile, devDataFile):
+def naiveBayes(trainDataFile, devDataFile, classifier):
 
     def readDataFile(dataFile):
         """
@@ -99,7 +101,18 @@ def secondAttempt(trainDataFile, devDataFile):
     instances, labels, classes = readDataFile(trainDataFile)
 
     print("Training the model")
-    clf = MultinomialNB()
+
+    if classifier == "svc":
+        clf = LinearSVC()
+    elif classifier == "nb":
+        clf = MultinomialNB()
+    elif classifier == "nbBoost"
+        clf = MultinomialNB()
+        clf = AdaBoostClassifier(clf)
+    else:
+        print("Invalid classifier choice.")
+        return
+
     clf.fit(instances, labels)
 
     timeForTrain = time.time() - startTime
@@ -159,5 +172,8 @@ def secondAttempt(trainDataFile, devDataFile):
     print("Time taken to test the model: {0:.2f} sec".format(timeForTest))
     print()
 
+
+
+
 if __name__ == "__main__":
-    secondAttempt(train35F, dev35F)
+    naiveBayes(train35F, dev35F, "svc")
