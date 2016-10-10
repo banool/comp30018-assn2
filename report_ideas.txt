@@ -50,7 +50,13 @@ Returning to the San Diego vs rest example for Naive Bayes 446 NAMING TODO, the 
 
     While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't overskewing the final evaluation.
 
+    Once this good per-class metric is acquired, it needs to be applied to the whole class. Averaging the result over all the classes is straightforward for binary classification, but in multi class there are multiple ways: macro, in which simply the metric for each class is averaged, and micro, in which all individual instance values are pooled and averaged. TODO IS THIS RIGHT? "Large classes dominate small classes in microaveraging FOOTNOTE (Because the F1 measure ignores true negatives and its magnitude is mostly determined by the number of true positives, http://www.clips.ua.ac.be/~vincent/pdf/microaverage.pdf)". In other words, in macro, small classes have more weight than they would in micro. Such a behaviour could be desirable in classifying for kinds of illnesses, where even if an illness is rare, one still wants to "reward" a model that classifies into the rare illness correctly. In the geolocation classifier the goal isn't to prefer rarer classes, but macro-averaging will also be used for the inverse effect, so as to not over-weight classes with many instances (namely San Diego). Going forward, the per-classifer F-Scores used will be macro-averaged.
+
     BASELINE
+
+    The baseline used here is 0-R, in which all test instances are classified into the most common class from the training data (San Diego). The results here are understandably terrible. Precision, Recall and F-Score aren't defined (division by 0) for the classes without predictions (all but SD), so are set to 0.00. Recall for SD looks good at 100%, but is entirely meaningless in this context, while precision is 0.26 MAYBE FOOTNOTE LINK TO RESULTS IN APPENDICES. The baseline is established as the macro-averaged F0.5-Score:
+
+    FORMULA (0.00 + 0.00 + 0.00 + 0.00 + 0.31)/5 =roughly 0.06
 
 
     NAIVE BAYES
@@ -79,3 +85,15 @@ TALK ABOUT BASELINES AND BENCHMARKS. TALK ABOUT BIAS AND VARIANCE.
 THIS REPORT CONSIDERS HOW BEST TO EVALUATE THE PERFORMANCE OF A GEOLOCATION CLASSIFIER, LOOKING INITIALLY AT STANDARD METRICS BEFORE DEVELOPING METRICS TAILORED SPECIFICALLY FOR THIS TASK.
 
 DO THE , average="micro" IN THE EVALUATION UNDER parameterizableReport
+
+SHOW F1 SCORE FOR SOME TWO CLASSIFIERS THEN SHOW F0.5 SCORE AND SEE THE DIFFERENCE.
+
+INDUCTIVE LEARNING HYPOTHESIS: any hypothesis found ot approximate the target function well over (a sufficiently large) training data set will also approximate the target function well over held out test examples.
+
+talk about how fscore saves us looking at roc graphs?
+
+why naive bayes and svm?
+
+
+
+MAYBE LOOK AT BOTH MICRO AND MACRO see answer here for why: http://stats.stackexchange.com/questions/156923/should-i-make-decisions-based-on-micro-averaged-or-macro-averaged-evaluation-mea

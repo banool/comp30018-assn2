@@ -110,15 +110,16 @@ def writeOutput(ids, predicted, fname):
 
 # Prints a classification report in which you're allowed to specify your own beta for f-score.
 # Prints different averages than classsification_report prints for some reason.
-def parameterizableReport(correct, predicted, target_names, beta=1.0):
-    results = precision_recall_fscore_support(correct, predicted, labels=target_names, beta=beta) # ,average="micro"
-    print(results)
+def parameterizableReport(correct, predicted, target_names, beta=1.0, averageType=None):
+    results = precision_recall_fscore_support(correct, predicted, labels=target_names, beta=beta)
     transposed = list(map(list, zip(*results)))
 
-    print("             precision    recall  f{0:.2f}-score    support".format(beta))
-    print()
-    i = 0
     out = []
+
+    out.append("             precision    recall  f{0:.2f}-score    support".format(beta))
+    out.append("")
+
+    i = 0
     for line in transposed:
         compiled = []
         compiled.append(" " * (11-len(target_names[i])))
@@ -128,13 +129,20 @@ def parameterizableReport(correct, predicted, target_names, beta=1.0):
         out.append("".join(compiled))
         i += 1
 
-    averagePrecision = np.average(results[0])
-    averageRecall = np.average(results[1])
-    averageFScore = np.average(results[2]) # TODO could change averaging method.
-    totalSupport = sum(results[3])
+    if averageType is not None:
+        avs = precision_recall_fscore_support(correct, predicted, labels=target_names, beta=beta, average=averageType)
+        averagePrecision, averageRecall, averageFScore = avs[:3]
+        totalSupport = sum(results[3])
+        rowTitle = " "*(6 - len(averageType)) + "avg: " + averageType
+    else:
+        averagePrecision = np.average(results[0])
+        averageRecall = np.average(results[1])
+        averageFScore = np.average(results[2]) # TODO could change averaging method.
+        totalSupport = sum(results[3])
+        rowTitle = "avg / total"
 
-    args = [averagePrecision, averageRecall, averageFScore, totalSupport]
-    out.append("\navg / total       {0:.2f}      {1:.2f}         {2:.2f}      {3:5d}".format(*args))
+    args = [rowTitle, averagePrecision, averageRecall, averageFScore, totalSupport]
+    out.append("\n{0}       {1:.2f}      {2:.2f}         {3:.2f}      {4:5d}".format(*args))
     return "\n".join(out)
 
 
@@ -148,8 +156,7 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
 
     ids, instances, labels, features, classes = readArffFile(trainDataFile)
 
-    print("Training the model")
-
+    classifier = classifier.lower()
     if classifier == "svc" or classifier == "svm":
         clf = LinearSVC()
     elif classifier == "nb":
@@ -157,15 +164,21 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
     elif classifier.lower() == "nbboost" or classifier.lower() == "nbboosted":
         clf = MultinomialNB()
         clf = AdaBoostClassifier(clf)
-    elif classifier.lower() == "1r":
+    elif classifier == "1r":
         print("Sorry, 1R / LinearRegression isn't working right now")
         exit()
         clf = LinearRegression(copy_X=False,fit_intercept=True, normalize=False)
+    elif classifier == "0r":
+        from collections import Counter
+        mostCommonTrainingClass = Counter(labels).most_common(1)[0][0]
     else:
         print("Invalid classifier choice.")
         return
 
-    clf.fit(instances, labels)
+    print("Training the model")
+
+    if classifier != "0r":
+        clf.fit(instances, labels)
 
     timeForTrain = time.time() - startTime
     numTrainInstances = len(instances)
@@ -189,7 +202,11 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
             print("\r" + str(i).zfill(len(str(lenInstances))) + "/" + str(lenInstances) + " ", end="")
         instance = instances[i]
         label = labels[i]
-        res = predictPrint(clf, instance)
+
+        if classifier == "0r":
+            res = mostCommonTrainingClass
+        else:
+            res = predictPrint(clf, instance)
         predicted.append(res)
         # print("-- Predicted label: {} || Correct label: {} --". format(res, label))
         if res == label:
@@ -208,7 +225,7 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
     Printing various evaluation metrics.
     """
     # report = classification_report(labels, predicted, target_names=classes)
-    report = parameterizableReport(labels, predicted, beta=0.5, target_names=classes)
+    report = parameterizableReport(labels, predicted, beta=0.5, target_names=classes, averageType="macro")
     print(report)
     print()
     #print(classification_report(labels, predicted, target_names=classes))
