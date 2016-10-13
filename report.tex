@@ -1,0 +1,157 @@
+\documentclass[twocolumn]{article}
+\usepackage[utf8]{inputenc}
+\setlength{\columnsep}{3em}
+
+\usepackage{comment}
+\usepackage{enumitem}
+\usepackage{textcomp}
+ 
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+
+\title{COMP30018 Knowledge Technologies \\ \large Assessing evaluative metrics for effectively comparing classifiers}
+\author{Daniel Porteous 696965}
+\date{October 2016}
+
+\addbibresource{bib.bib}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The aim of this report is not strictly to compare classifiers, but to consider evaluation itself. The majority of the report evaluates major evaluative metrics, before applying them to two different classifiers: Naive Bayes and the Support Vector Machine (SVM). The metrics chosen, as well as the parameters used, are adjusted as to decide which classifier most effectively geo-classifies twitter users. Correctly classifying new test tweets is the most important desideratum, so evaluation metrics will be designed to value this heavily. Geo-classification in this context is a difficult task; most tweets will have sparse feature vectors which aren't sufficiently indicative of the correct class (given the best35 and best446 data-sets and no additional feature engineering), so evaluation will have to consider this information-deficient landscape. The Python Scikit framework\footnote{\cite{scikit-learn} Scikit Learn} is used to implement these machine learners, as well as assisting with evaluation.
+\par\vspace{4mm}
+This report is not concerned with the bias-variance trade-off, nor with feature engineering. As such, data is segmented according to the holdout method as per the given data-sets best35 and best446 \footnote{Feature selection thanks to Jeremy Nicholson}. As a shallow comment, bias will have been reduced in the 446 data-set vs. the 35 data-set due to a greater breadth of features with which instances are classified. Considering that there are potentially hundreds of thousands of features in the full data-set, a small selection such as 446 should hopefully not introduce too much variance. There is not much that can be done about noise, namely tweets in which the content is not related to the user's location. Tweets \textit{could} be grouped based on user ID to help decide on location, but this is not the objective of this report.
+
+\section{Evaluation}
+\subsection{Evaluative metrics}
+\subsubsection{Precision and Recall}
+The two main evaluative metrics used are precision and recall. Precision is\footnote{\newline TP: True positive \,\,\,Correctly identified\newline FP: False positive \,\,\,Incorrectly identified\newline TN: True negative \,\hspace{0.1em}Correctly rejected\newline FN: False negative\, Incorrectly rejected} 
+\begin{equation}
+\frac{TP}{TP+FP}
+\end{equation}
+which indicates what proportion of the retrieved instances are relevant. Recall is
+\begin{equation}
+\frac{TP}{TP+FN}
+\end{equation}
+which indicates what proportion of relevant instances are retrieved.
+\clearpage
+In the context of our geo-location classifier, precision and recall are frequently inversely related. This is best demonstrated by looking at the performance of a classifier on two classes.
+\begin{verbatim}
+             precision    recall
+
+          B       0.44      0.10
+          H       0.44      0.16
+         SD       0.29      0.79
+         Se       0.37      0.19
+          W       0.51      0.20
+          
+    - Naive Bayes on Best446 data-set
+\end{verbatim}
+
+These results demonstrate clearly the inverse relationship between precision and recall (IN THIS CONTEXT?). By considering just these two metrics, CHANGE WORDING one notices that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes (and many other classifiers), BEHAVIOUR NAME. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929 FOOTNOTE POINTING TO DATA IN APPENDICES IN SUPPORT COLUMN). This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
+
+With recall as the only metric, it looks like Naive Bayes 446 CLARFY NAMING is an incredible classifier for the SD class. Precision however indicates a major failing of this behaviour NAME???. Because so many instances are classified with such litle information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced (precision(SD) = 0.29, precision(other 4 classes) = 0.44 whereas recall(SD) = 0.79, recall(other 4 classes) = roughly 0.16).
+
+In the context of a geolocation classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geolocation classifer, THE GOAL BRUH WHAT IS IT.
+
+\subsubsection{F-Score}
+F-score is a measure which weighs precision and recall according to the factor $\beta$ to produce a single metric.
+FORMULA
+Such a combined metric allows for evaluation that considers both precision and recall without having to compare two separate values. F1 ($\beta = 1.0$) is the most widely used version, indicating the weighted harmonic mean of precision and recall (equal value).
+FORMULA
+For the geolocation classifier in question, precision has previously been indicated as being of greater value. F$_\beta$ "measures the effectiveness of retrieval with respect to a user who attaches $\beta$ times as much importance to recall as precision". Moving forward in evaluation, it seems reasonable to reduce $\beta$ such that precision is more important. Landing on a specific value is difficult; literature for such a pursuit is limited at best. As such, BETA=0.5 is selected, a point between even weighting and pure precision. Ultimately, it is most important that the same $\beta$ is used when comparing F-scores.
+
+Returning to the San Diego vs rest example for Naive Bayes 446 NAMING TODO, the $F0.5-Score(SD) = 0.33$ and the average of the other classes ROUGHLY EQUALS SIGN 0.33. Here one can see the F-Score working to more accurately indicate performance.
+
+
+\subsection{Evaluation of classifier performance using F-Score}
+While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't overskewing the final evaluation.
+
+    ESTABLISH BASELINE
+
+\subsubsection{Naive Bayes}
+
+\subsubsection{Support Vector Machine (SVM)}
+
+\subsection{Using more features MAYBE?}
+
+\subsection{Further evaluative measures/metrics/methods}
+
+\begin{enumerate}
+\item Going to WashingtnFc \textrightarrow Washington DC (Edit distance = 3)
+\end{enumerate}
+
+as well as spelling errors that cross space boundaries:
+
+\begin{enumerate}[resume]
+\item Family visiting from tob oston \textrightarrow Boston (Edit distance = 2)
+\end{enumerate}
+
+To do the former with global edit distance requires examining all the permutations of the tokens in respect to the length of the location being searched for, which diminishes the aforementioned advantages of global edit distance considerably. The latter task is even harder, as adjacent tokens will have to be considered on a per-character basis anyway.
+
+\subsection{TRE library}
+The TRE implementation of local edit distance features a per-search time complexity of $\mathcal{O}(n^2{}m)$, where $m$ is the length of the regex query (location) and $n$ is the length of the string being searched (tweet). While quadratic complexities are generally undesirable, the quadratic factor represents the location which is (usually) quite small compared to the length of the tweet. As such, the quadratic factor won't scale too heavily.
+
+\section{Pre-processing}
+\subsection{Basic operations}
+
+Some basic operations were first performed to clean up the data sets. While these steps involved tokenisation, the actual TRE algorithm did not. The small tweets file was comprised of 65969 words, which by the end of basic pre-processing was trimmed down to about $\simeq$40000 (consider that each tweet had 4 unimportant tokens, the numbers at the start and the datetime at the end).
+
+\begin{enumerate}
+\item Removing unnecessary tokens from tweets, namely the two numbers at the start and the datetime at the end.
+\item Removing punctuation and converting all characters to lower case for both locations and tweets (Twitter users don't capitalise locations consistently enough to utilise it).
+\item For locations, removing tokens that are predominantly numbers and then removing duplicates. In the location set this removes 60158 items (consider all the wells).
+\item Removing locations that are too short (4 chars) or long (70 chars). This removes 26995 items, but has obvious trade-offs in accuracy loss, anoter .
+\end{enumerate}
+
+The code implemented these steps one by one for demonstration purposes, though many could be done simultaneously in a single pass for improved efficiency.
+
+More heavy pre-processing steps could be performed taking into account Twitter conventions, for example that \textbf{rt:} means retweet or \textbf{@} precedes a username, which could likely be safely ignored (occasionally a place will have an associated Twitter account).
+
+\subsection{Removal of common words}
+This pre-processing step was tested with mixed results. It involved the following steps:
+
+\begin{enumerate}
+\item Get the standard dictionary of words in UNIX systems from /usr/share/dict/words.
+\item Iterate through the list, removing all locations in US-loc-names.txt from the dictionary. This leaves a dictionary of common words without location names.
+\item Using this dictionary, remove all common words from all tweets, ideally leaving behind only location words.
+\end{enumerate}
+
+This method significantly decreased the number of words in the tweets from $\simeq$40000 (ie. after previous pre-processing) by 33869 to $\simeq$6000.
+
+While it may seem like this would hinder matching of multi-word locations (eg. \textit{Kaby Lake}) because of the common word \textit{lake}, the US-loc-names.txt dictionary actually has many places with names such as \textit{Lake} alone. This prevented such issues from occurring as often as would be expected, making it a surprisingly valid method. Unfortunately, some other examples did suffer due to this procedure, for example removing the token \textit{San} from \textit{San Francisco}. This meant that it would only match on an edit distance of 3 \textit{Francisco}. Nonetheless, the improvement in run time was significant. For the small tweet file and all 1.3 million locations (picking up edit distances from 0-3 inclusive), runtime  with this improvement sat at $\simeq$35 minutes, whereas without it required $\simeq$165 minutes.
+
+\subsection{Inner-word matching}
+Something that turned out to be a much larger problem than expected was the substantial group of false matches where a small location substring (eg. Ash) was found within a larger location (eg. Washington DC). Local edit excels at this task (consider that the previous example is a perfect 0-cost match) which, while often desirable, was frequently annoying in this context. An effective solution was to modify the regex query from /\verb/query// to /\verb/\bquery\b//. While this still found small locations at the start and end of larger locations, it eliminated a large amount of the problematic cases. This is obviously in exchange for a loss in accuracy, another noteworthy performance metric, as some (very small) amount of correct matches would be missed.
+
+\section{Precision analysis}
+In analysing the performance of the algorithm, precision\footnote{ precision is defined in terms of $Correct Matches/Number of Matches$.} is primarily considered. A measure such as recall is unfeasible to calculate due to the enormous amount of manual work required to find all misspelled locations. Accuracy has been previously touched on.
+
+\subsection{Precision metric}
+ The notion of a correct match is difficult to define. An algorithm such as this cannot intuitively tell whether a match is truly correct. Indeed, as far as the algorithm is concerned, each one of these matches \textbf{is} correct because it is within the given edit distance of one of the locations in the dictionary. As such, the following precision measures were ascertained by selecting a random subset of all the matches and deciding whether the matched location is what the user intended, for example \textit{Berkley} \textrightarrow \textit{Berkeley}, or not, for example \textit{Coupon} \textrightarrow \textit{Boston}. (Note also that calculating recall is effectively unfeasible due to the enormous amount of manual work required to find all misspelled locations in question).
+
+\subsection{Results}
+As expected, there are an enormous amount of false positives (incorrect matches). Inversely, at least by manual inspection there seem to be very few missed mistakes. This makes sense because the results capture so many variations with an edit distance of even 2, let alone 3. The vast amount of false positives are a result of a couple of factors, namely the huge amount of location names, especially small ones. More aggressive culling of small location names could be a way around this error, as well as a more sophisticated approach to the removal of common words.
+
+A function was written which produces 200 random matches at a given edit distance. These are manually-verified precision measures for said 200 tweets at edit distances of 1-3 (files for which are included with the code):
+
+\begin{enumerate}
+\item 6\% (12/200)
+\item 2\% (2/200)
+\item 0\% (0/200)
+\end{enumerate}
+
+We see that as we increase edit distance, precision goes down. These results are to be expected (though to be taken cautiously over such a small sample size), as with each increase in the edit distance a far greater range of locations could match, the vast majority of which won't be correct matches, especially considering the wide range of cases that local edit distance handles better than other algorithms.
+
+\section{Conclusion}
+It goes without saying that the vast majority of potential spelling corrections that these algorithms find are not what the user had in mind. A good few steps towards improving these would be to aggressively cut down the locations dictionary down to the most commonly talked-about places, as well as more intelligent elimination of non-location words from the tweets in question. Real improvements would ideally come from more complicated technologies such as natural language processing, in which the algorithm could understand where a location is most likely to appear in a tweet, if at all. Anything that can bring the computer closer to attaining wisdom/understanding will be essential in the face of such a computationally enormous task.
+
+
+\printbibliography
+
+\end{document}

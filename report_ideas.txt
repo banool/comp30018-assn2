@@ -8,56 +8,17 @@ Note the recall, why is the recall for SD so freakishly large compared to the ot
 
 This report considers different metrics and techniques for evaluating the performance of classifiers. Those mainly considered are precision and recall, including the relationship between them, and F-score, particularly variations upon it. FURTHER METRICS YES? Once metrics for evaluation are established, they are used to compare the two main classifiers in question, Naive Bayes and Support Vector Machine (SVM), in which the reasons for their performance are evaluated and their weaknesses are highlighted. As an extension, various methods to improve their performance are explored, namely boosting for Naive Bayes and kernel selection for SVM. ARE WE INTERESTED IN NUM OF FEATURES INCREASING OR NOT
 
-INTRODUCTION
+
   
- This report is not primarily concerned with the bias-variance tradeoff; as such, data is segmented according to the holdout method as per the given datasets best35 and best446 FOOTNOTE. As a shallow comment, it is fair to say that with the 446 dataset, bias will have been reduced due to a greater breadth of features with which instances are classified (in comparison to the 35 dataset). Considering that there are potentially hundreds of thousands of features in the full dataset, a small selection such as 446 should hopefully not introduce too much variance. There is not much that can be done about noise, though the size of the dataset should hopefully minimise its effect. MAYBE REMOVE THIS SENTENCE. MAYBE MOVE THIS SECTION INTO FURTHER ANALYSIS.
-
-EVALUATION
-
-  EVALUATIVE METRICS
-
-    PRECISION AND RECALL
-
-The two main evaluative metrics used are precision and recall. Precision is TP/TP+FP (see footnotes for what these are), indicating what proportion of the retrieved instances are relevant. Recall is TP/TP+FP, indicating what proportion of relevant instances are retrieved. MAYBE GET A SOURCE FOR THIS. In the context of our geolocation classifier, precision and recall are frequently inversely related. This is best demonstrated by looking at the performance of a classifier on two classes.
-
-[snippet of classification report for naive bayes 446. see apendices for full metric readouts.]
-             precision    recall
-
-          B       0.44      0.10
-          H       0.44      0.16
-         SD       0.29      0.79
-         Se       0.37      0.19
-          W       0.51      0.20
-
-
-These results demonstrate clearly the inverse relationship between precision and recall (IN THIS CONTEXT?). By considering just these two metrics, CHANGE WORDING one notices that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes (and many other classifiers), BEHAVIOUR NAME. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929 FOOTNOTE POINTING TO DATA IN APPENDICES IN SUPPORT COLUMN). This most clearly explains the extremely high recall of 79%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
-
-With recall as the only metric, it looks like Naive Bayes 446 CLARFY NAMING is an incredible classifier for the SD class. Precision however indicates a major failing of this behaviour NAME???. Because so many instances are classified with such litle information into SD, it is hardly surprising that 71% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced (precision(SD) = 0.29, precision(other 4 classes) = 0.44 whereas recall(SD) = 0.79, recall(other 4 classes) = roughly 0.16).
-
-In the context of a geolocation classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geolocation classifer, THE GOAL BRUH WHAT IS IT.
-
-    F-SCORE
-
-F-score is a measure which weighs precision and recall according to the factor β to produce a single metric.
-FORMULA
-Such a combined metric allows for evaluation that considers both precision and recall without having to compare two separate values. F1 (β = 1.0) is the most widely used version, indicating the weighted harmonic mean of precision and recall (equal value).
-FORMULA
-For the geolocation classifier in question, precision has previously been indicated as being of greater value. Fβ SUSCRIPT BETA"measures the effectiveness of retrieval with respect to a user who attaches β times as much importance to recall as precision". Moving forward in evaluation, it seems reasonable to reduce β such that precision is more important. Landing on a specific value is difficult; literature for such a pursuit is limited at best. As such, BETA=0.5 is selected, a point between even weighting and pure precision. Ultimately, it is most important that the same β is used when comparing F-scores.
-
-Returning to the San Diego vs rest example for Naive Bayes 446 NAMING TODO, the F0.5-Score of SD = 0.33 and the average of the other classes ROUGHLY EQUALS SIGN 0.33. Here one can see the F-Score working to more accurately indicate performance.
+    PROBLEMS WITH F-SCORE
+    http://www.kdd.org/exploration_files/v12-1-p49-forman-sigkdd.pdf page 6
 
   EVALUATION OF CLASSIFIER PERFORMANCE USING F-SCORE
 
-    While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't overskewing the final evaluation.
+    (Because the F1 measure ignores true negatives and its magnitude is mostly determined by the number of true positives,
 
-    Once this good per-class metric is acquired, it needs to be applied to the whole class. Averaging the result over all the classes is straightforward for binary classification, but in multi class there are multiple ways: macro, in which simply the metric for each class is averaged, and micro, in which all individual instance values are pooled and averaged. TODO IS THIS RIGHT? "Large classes dominate small classes in microaveraging FOOTNOTE (Because the F1 measure ignores true negatives and its magnitude is mostly determined by the number of true positives, http://www.clips.ua.ac.be/~vincent/pdf/microaverage.pdf)". In other words, in macro, small classes have more weight than they would in micro. Such a behaviour could be desirable in classifying for kinds of illnesses, where even if an illness is rare, one still wants to "reward" a model that classifies into the rare illness correctly. In the geolocation classifier the goal isn't to prefer rarer classes, but macro-averaging will also be used for the inverse effect, so as to not over-weight classes with many instances (namely San Diego). Going forward, the per-classifer F-Scores used will be macro-averaged.
 
-    BASELINE
-
-    The baseline used here is 0-R, in which all test instances are classified into the most common class from the training data (San Diego). The results here are understandably terrible. Precision, Recall and F-Score aren't defined (division by 0) for the classes without predictions (all but SD), so are set to 0.00. Recall for SD looks good at 100%, but is entirely meaningless in this context, while precision is 0.26 MAYBE FOOTNOTE LINK TO RESULTS IN APPENDICES. The baseline is established as the macro-averaged F0.5-Score:
-
-    FORMULA (0.00 + 0.00 + 0.00 + 0.00 + 0.31)/5 =roughly 0.06
-
+TITLE LIKE: APPLICATION OF EVALUATIVE METRICS
 
     NAIVE BAYES
 
@@ -73,7 +34,7 @@ Returning to the San Diego vs rest example for Naive Bayes 446 NAMING TODO, the 
 
 avg / total       0.50      0.33      0.27     68532
 
-  USING MORE FEATURES
+  USING MORE FEATURES ???
 
   FURTHER EVALUATIVE METRICS
 
@@ -97,3 +58,5 @@ why naive bayes and svm?
 
 
 MAYBE LOOK AT BOTH MICRO AND MACRO see answer here for why: http://stats.stackexchange.com/questions/156923/should-i-make-decisions-based-on-micro-averaged-or-macro-averaged-evaluation-mea
+
+ERROR RATE?

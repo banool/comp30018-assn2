@@ -1,0 +1,153 @@
+\documentclass[twocolumn]{article}
+\usepackage[utf8]{inputenc}
+\setlength{\columnsep}{3em}
+
+\usepackage{comment}
+\usepackage{enumitem}
+\usepackage{textcomp}
+ 
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+
+\title{COMP30018 Knowledge Technologies \\ \large Assessing evaluative metrics for effectively comparing classifiers}
+\author{Daniel Porteous 696965}
+\date{October 2016}
+
+\addbibresource{bib.bib}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+The aim of this report is not strictly to compare classifiers, but to consider evaluation itself. The majority of the report evaluates major evaluative metrics, before applying them to two different classifiers: Naive Bayes and the Support Vector Machine (SVM). The metrics chosen, as well as the parameters used, are adjusted as to decide which classifier most effectively geo-classifies twitter users. Correctly classifying new test tweets is the most important desideratum, so evaluation metrics will be designed to value this heavily. Geo-classification in this context is a difficult task; most tweets will have sparse feature vectors which aren't sufficiently indicative of the correct class (given the best35 and best446 data-sets and no additional feature engineering), so evaluation will have to consider this information-deficient landscape. The Python Scikit framework\footnote{\cite{scikit-learn} Scikit Learn} is used to implement these machine learners, as well as assisting with evaluation.
+\par\vspace{4mm}
+This report is not concerned with the bias-variance trade-off, nor with feature engineering. As such, data is segmented according to the holdout method as per the given data-sets best35 and best446 \footnote{Feature selection thanks to Jeremy Nicholson}. As a shallow comment, bias will have been reduced in the 446 data-set vs. the 35 data-set due to a greater breadth of features with which instances are classified. Considering that there are potentially hundreds of thousands of features in the full data-set, a small selection such as 446 should hopefully not introduce too much variance. There is not much that can be done about noise, namely tweets in which the content is not related to the user's location. Tweets \textit{could} be grouped based on user ID to help decide on location, but this is not the objective of this report.
+
+\section{Evaluation}
+\subsection{Evaluative metrics}
+\subsubsection{Precision and Recall}
+The two main evaluative metrics used are precision and recall. Precision is\footnote{\newline TP: True positive \,\,\,Correctly identified\newline FP: False positive \,\,\,Incorrectly identified\newline TN: True negative \,\hspace{0.1em}Correctly rejected\newline FN: False negative\, Incorrectly rejected} 
+\begin{equation}
+\frac{TP}{TP+FP}
+\end{equation}
+which indicates what proportion of the retrieved instances are relevant. Recall is
+\begin{equation}
+\frac{TP}{TP+FN}
+\end{equation}
+which indicates what proportion of relevant instances are retrieved.
+\clearpage
+In the context of our geo-location classifier, precision and recall are frequently inversely related. This is best demonstrated by looking at the performance of a classifier on two classes.
+\begin{verbatim}
+             precision    recall
+
+          B       0.44      0.10
+          H       0.44      0.16
+         SD       0.29      0.79
+         Se       0.37      0.19
+          W       0.51      0.20
+          
+    - Subset of results for Naive Bayes 
+      on Best446
+\end{verbatim}
+
+These results demonstrate clearly the inverse relationship between precision and recall in this context. By considering just these two metrics, it's clear that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes, and other similar classifiers. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929\footnote{Full results for Naive Bayes on Best446 in Appendix 1}. This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
+
+With recall as the only metric, it looks like Naive Bayes is an incredible classifier for the SD class. Precision however indicates a major failing of this "majority classification" behaviour. Because so many instances are classified with such little information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced.
+\begin{equation}
+precision(SD) = 0.29
+\end{equation}
+\begin{equation}
+precision(\{B, H, Se, W\}) = 0.44
+\end{equation}
+\begin{equation}
+recall(SD) = 0.79
+\end{equation}
+\begin{equation}
+recall(\{B, H, Se, W\}) \approx 0.16
+\end{equation}
+
+Note the respective similarities of the precision and recall measures.
+
+In the context of a geo-location classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geo-location classifier, namely evaluating positively classifiers that classify each new instance correctly.
+
+\subsubsection{F-Score}
+F-score is a measure which weighs precision and recall according to the factor $\beta$ to produce a single metric.
+\begin{equation}
+F_\beta = (1+\beta ^2) \cdot \frac{precision \cdot recall}{precision + recall}
+\end{equation}
+Such a combined metric allows for evaluation that considers both precision and recall without having to compare two separate values. F1 ($\beta = 1.0$) is the most widely used version, indicating the weighted harmonic mean of precision and recall (equal value).
+\begin{equation}
+F_1 = 2 \cdot \frac{precision \cdot recall}{precision + recall}
+\end{equation}
+For the geo-location classifier in question, precision has previously been indicated as being of greater value. $F_\beta$ "measures the effectiveness of retrieval with respect to a user who attaches $\beta$ times as much importance to recall as precision"\footnote{\cite{vanrijsbergenc.j.1979} Information Retrieval, Van Rijsbergen}. Moving forward in evaluation, it seems reasonable to reduce $\beta$ such that precision is more important. Landing on a specific value is difficult; literature for such a pursuit is limited at best. As such, $\beta = 0.5$ is selected, a point between even weighting and pure precision. Ultimately, it is most important that the same $\beta$ is used when comparing F-scores.
+
+Returning to the San Diego vs rest example for Naive Bayes 446, the $F0.5-Score(SD) = 0.33$ and the average of the other classes ROUGHLY EQUALS SIGN 0.33. Here one can see the F-Score working to more accurately indicate performance.
+
+While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't over-skewing the final evaluation.
+
+
+\subsection{Averaging methods to enable evaluation of classifier performance using F-Score}
+Once this per-class metric is acquired, it needs to be applied to the whole classifier. Averaging the result over all the classes is straightforward for binary classification, but in multi-class classification there are multiple methods: macro, in which simply the metric for each class is averaged, and micro, in which all individual instance values are pooled and averaged. In macro, small classes have more weight than they would in micro. Such a behaviour could be desirable in classifying for kinds of illnesses, where even if an illness is rare, one still wants to "reward" a model that classifies into the rare illness correctly. In the geo-location classifier the goal isn't to prefer rarer classes. However, macro-averaging will still be used, because "Large classes dominate small classes in microaveraging".\footnote{\cite{vincentvanasch2013} Macro and micro-averaged evaluation measures} This opinion is reinforced by Marina Sokolova and Guy Lapalme: "Macro-averaging treats all classes equally while micro-averaging favors bigger classes".\footnote{\cite{sokolovam.lapalmeg.2009} A systematic analysis of performance measures for classification tasks}
+
+According to George Forman and Martin Scholz\footnote{\cite{formang.scholzm2010} Apples-to-Apples in Cross-Validation Studies: Pitfalls in Classifier Performance Measurement}, micro is generally superior to macro, but they are primarily concerned with instances where researchers are interested in class sizes and weights, which as discussed previously is not applicable here.
+
+Going forward, the per-classifier F-Scores used will be macro-averaged for the inverse effect, so as to not over-weight classes with many instances (namely San Diego). Ultimately, because all classes are similar in size, both methods wouldn't yield enormously different results.
+
+
+\subsection{Evaluating classifiers with established evaluation framework (F-Score)}
+
+\subsubsection{Baselne}
+The baseline used here is Zero-R, in which all test instances are classified into the most common class from the best446 training data-set (San Diego). The results here are understandably terrible. Precision, Recall and F-Score aren't defined (division by 0) for the classes without predictions (all but SD), so are set to 0.00. Recall for SD looks good at 100\%, but is entirely meaningless in this context, while precision is, again, more indicative at 0.26\footnote{See appendix 1 for full Zero-R Best446 results}. The baseline is established as the macro-averaged F0.5-Score:
+
+\begin{equation}
+F_{0.5}Score = \frac{0.00 \cdot 4 + 0.31}{5} \approx 0.06
+\end{equation}
+
+\subsubsection{Naive Bayes}
+
+\subsubsection{Support Vector Machine (SVM)}
+
+\subsection{Using more features MAYBE?}
+
+\subsection{Further evaluative measures/metrics/methods}
+
+\section{Conclusion}
+
+\section{Appendices}
+\subsection{Appendix 1: Results from different classifiers and data-sets}
+Not all results are included here, only those referenced in the report.
+\subsubsection{Naive Bayes Best 446}
+\begin{verbatim}
+     precision  recall  f0.50-score   support
+ B   0.44       0.10    0.27          12061
+ H   0.44       0.16    0.33          12578
+SD   0.29       0.79    0.33          17929
+Se   0.37       0.19    0.31          14482
+ W   0.51       0.20    0.39          11482
+
+avg  0.41       0.29    0.33          68532
+
+Time taken to train the model: 4.94 sec
+Time taken to test the model: 6.21 sec
+\end{verbatim}
+\subsubsection{Zero-R Best 446}
+\begin{verbatim}
+     precision  recall  f0.50-score   support
+ B   0.44       0.10    0.27          12061
+ H   0.44       0.16    0.33          12578
+SD   0.29       0.79    0.33          17929
+Se   0.37       0.19    0.31          14482
+ W   0.51       0.20    0.39          11482
+
+avg  0.41       0.29    0.33          68532
+
+Time taken to train the model: 4.94 sec
+Time taken to test the model: 6.21 sec
+\end{verbatim}
+\printbibliography
+
+\end{document}

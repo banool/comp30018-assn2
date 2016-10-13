@@ -256,3 +256,31 @@ avg / total       0.65      0.22         0.15      68532
 
 Time taken to train the model: 56.19 sec
 Time taken to test the model: 440.24 sec
+
+35 0r
+             precision    recall  f0.50-score    support
+
+          B       0.00      0.00         0.00      12061
+          H       0.00      0.00         0.00      12578
+         SD       0.26      1.00         0.31      17929
+         Se       0.00      0.00         0.00      14482
+          W       0.00      0.00         0.00      11482
+
+ avg: macro       0.05      0.20         0.06      68532
+
+Time taken to train the model: 0.28 sec
+Time taken to test the model: 0.53 sec
+
+446 0r
+             precision    recall  f0.50-score    support
+
+          B       0.00      0.00         0.00      12061
+          H       0.00      0.00         0.00      12578
+         SD       0.26      1.00         0.31      17929
+         Se       0.00      0.00         0.00      14482
+          W       0.00      0.00         0.00      11482
+
+ avg: macro       0.05      0.20         0.06      68532
+
+Time taken to train the model: 4.76 sec
+Time taken to test the model: 1.25 sec
