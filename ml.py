@@ -17,10 +17,13 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import AdaBoostClassifier
 import time
 import csv
+
+from plot_confusion_matrix import plot_confusion_matrix
 
 train35F = "best35/train-best35.arff"
 dev35F  = "best35/dev-best35.arff"
@@ -30,7 +33,9 @@ train446F = "best446/train-best446.arff"
 dev446F = "best446/dev-best446.arff"
 test446F = "best446/test-best446.arff"
 
-outputFileName = "predicted.csv"
+outputFileName = "predicted"
+
+dataSet = None
 
 
 def readArffFile(dataFile):
@@ -109,7 +114,7 @@ def writeOutput(ids, predicted, fname):
         a.writerows(idsWithPredicted)
 
 # Prints a classification report in which you're allowed to specify your own beta for f-score.
-# Prints different averages than classsification_report prints for some reason.
+# The standard classification_report function allows no changing of each metric's parameters.
 def parameterizableReport(correct, predicted, target_names, beta=1.0, averageType=None):
     results = precision_recall_fscore_support(correct, predicted, labels=target_names, beta=beta)
     transposed = list(map(list, zip(*results)))
@@ -147,21 +152,25 @@ def parameterizableReport(correct, predicted, target_names, beta=1.0, averageTyp
 
 
 
-def trainAndEvaluate(trainDataFile, devDataFile, classifier):
+def trainAndEvaluate(trainDataFile, devDataFile, classifier, average):
 
     """
     Creating and training the model.
     """
-    startTime = time.time()
 
     ids, instances, labels, features, classes = readArffFile(trainDataFile)
 
+    startTime = time.time()
+
     classifier = classifier.lower()
     if classifier == "svc" or classifier == "svm":
+        print("Using SVM")
         clf = LinearSVC()
     elif classifier == "nb":
+        print("Using Naive Bayes")
         clf = MultinomialNB()
     elif classifier.lower() == "nbboost" or classifier.lower() == "nbboosted":
+        print("Using Boosted Naive Bayes")
         clf = MultinomialNB()
         clf = AdaBoostClassifier(clf)
     elif classifier == "1r":
@@ -169,6 +178,7 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
         exit()
         clf = LinearRegression(copy_X=False,fit_intercept=True, normalize=False)
     elif classifier == "0r":
+        print("Using 0R")
         from collections import Counter
         mostCommonTrainingClass = Counter(labels).most_common(1)[0][0]
     else:
@@ -186,10 +196,11 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
     """
     Testing and evaluating the model
     """
-    startTime = time.time()
 
     # Throw away the features and classes, we've already read them in.
     ids, instances, labels, _, _ = readArffFile(devDataFile)
+
+    startTime = time.time()
 
     print("Testing the model")
     numCorrect = 0
@@ -215,9 +226,11 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
             numWrong += 1
     print()
 
-    predicted = np.array(predicted)
-    writeOutput(ids, predicted, outputFileName)
     timeForTest = time.time() - startTime
+
+    predicted = np.array(predicted)
+    outName = outputFileName + classifier.upper() + dataSet + ".csv"
+    writeOutput(ids, predicted, outName)
     numDevInstances = len(instances)
 
 
@@ -225,10 +238,10 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
     Printing various evaluation metrics.
     """
     # report = classification_report(labels, predicted, target_names=classes)
-    report = parameterizableReport(labels, predicted, beta=0.5, target_names=classes, averageType="macro")
+    report = parameterizableReport(labels, predicted, beta=0.5, target_names=classes, averageType=average)
     print(report)
     print()
-    #print(classification_report(labels, predicted, target_names=classes))
+    # print(classification_report(labels, predicted, target_names=classes))
 
     """
     print("Number of training instances: {}".format(numTrainInstances))
@@ -245,11 +258,22 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier):
     print("Time taken to test the model: {0:.2f} sec".format(timeForTest))
     print()
 
+    confMatrix = confusion_matrix(labels, predicted)
+    if classifier == "nb":
+        title = "Naive Bayes"
+    elif classifier == "svm" or classifier == "svc":
+        title = "Support Vector Machine"
+    title += " " + dataSet
+    plot_confusion_matrix(confMatrix, classes, title=title, normalize=True)
+
 
 from sys import argv, exit
 
+def printUsage():
+    print("Usage: {} [data_set] [classifier] <average_type>".format(argv[0]))
+
 if __name__ == "__main__":
-    if len(argv) == 3:
+    if len(argv) >= 3:
 
         dataSet = argv[1]
         classifier = argv[2]
@@ -268,11 +292,21 @@ if __name__ == "__main__":
             devFile = test446F
         else:
             print("Invalid data set choice.")
-            exit() 
+            printUsage()
+            exit()
 
-        trainAndEvaluate(trainFile, devFile, classifier)
+        average = None
+
+        if len(argv) == 4:
+            average = argv[3]
+            if average not in ["micro", "macro", "weighted"]:
+                print("Invalid average choice.")
+                printUsage()
+                exit()
+
+        trainAndEvaluate(trainFile, devFile, classifier, average)
     else:
-        print("Usage: {} [data_set] [classifier]".format(argv[0]))
+        printUsage()
 
 
 """

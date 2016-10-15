@@ -5,6 +5,8 @@
 \usepackage{comment}
 \usepackage{enumitem}
 \usepackage{textcomp}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
  
 \usepackage[
 backend=biber,
@@ -23,9 +25,7 @@ sorting=ynt
 \maketitle
 
 \section{Introduction}
-The aim of this report is not strictly to compare classifiers, but to consider evaluation itself. The majority of the report evaluates major evaluative metrics, before applying them to two different classifiers: Naive Bayes and the Support Vector Machine (SVM). The metrics chosen, as well as the parameters used, are adjusted as to decide which classifier most effectively geo-classifies twitter users. Correctly classifying new test tweets is the most important desideratum, so evaluation metrics will be designed to value this heavily. Geo-classification in this context is a difficult task; most tweets will have sparse feature vectors which aren't sufficiently indicative of the correct class (given the best35 and best446 data-sets and no additional feature engineering), so evaluation will have to consider this information-deficient landscape. The Python Scikit framework\footnote{\cite{scikit-learn} Scikit Learn} is used to implement these machine learners, as well as assisting with evaluation.
-\par\vspace{4mm}
-This report is not concerned with the bias-variance trade-off, nor with feature engineering. As such, data is segmented according to the holdout method as per the given data-sets best35 and best446 \footnote{Feature selection thanks to Jeremy Nicholson}. As a shallow comment, bias will have been reduced in the 446 data-set vs. the 35 data-set due to a greater breadth of features with which instances are classified. Considering that there are potentially hundreds of thousands of features in the full data-set, a small selection such as 446 should hopefully not introduce too much variance. There is not much that can be done about noise, namely tweets in which the content is not related to the user's location. Tweets \textit{could} be grouped based on user ID to help decide on location, but this is not the objective of this report.
+The aim of this report is not strictly to compare classifiers, but to consider evaluation itself.\footnote{See Appendix 2 for short comment on topics not covered in this report.} This report evaluates major evaluative metrics, before applying them to two different classifiers: Naive Bayes and the Support Vector Machine (SVM). The metrics chosen, as well as the parameters used, are adjusted as to decide which classifier most effectively geo-classifies twitter users. Correctly classifying new test tweets is the most important desideratum, so evaluation metrics will be designed to value this heavily. Geo-classification in this context is a difficult task; most tweets will have sparse feature vectors which aren't sufficiently indicative of the correct class (given the best35 and best446 data-sets and no additional feature engineering), so evaluation will have to consider behaviours which are affected by this information-deficient landscape. The Python Scikit framework\footnote{\cite{scikit-learn} Scikit Learn} is used to implement these machine learners, as well as assisting with evaluation.
 
 \section{Evaluation}
 \subsection{Evaluative metrics}
@@ -50,108 +50,176 @@ In the context of our geo-location classifier, precision and recall are frequent
          Se       0.37      0.19
           W       0.51      0.20
           
-    - Naive Bayes on Best446 data-set
+    - Subset of results for Naive Bayes 
+      on best446
 \end{verbatim}
 
-These results demonstrate clearly the inverse relationship between precision and recall (IN THIS CONTEXT?). By considering just these two metrics, CHANGE WORDING one notices that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes (and many other classifiers), BEHAVIOUR NAME. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929 FOOTNOTE POINTING TO DATA IN APPENDICES IN SUPPORT COLUMN). This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
+These results demonstrate clearly the inverse relationship between precision and recall in this context. By considering just these two metrics, it's clear that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes, and other similar classifiers. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929\footnote{Full results for Naive Bayes on best446 in Appendix 1}. This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
 
-With recall as the only metric, it looks like Naive Bayes 446 CLARFY NAMING is an incredible classifier for the SD class. Precision however indicates a major failing of this behaviour NAME???. Because so many instances are classified with such litle information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced (precision(SD) = 0.29, precision(other 4 classes) = 0.44 whereas recall(SD) = 0.79, recall(other 4 classes) = roughly 0.16).
+With recall as the only metric, it looks like Naive Bayes is an incredible classifier for the SD class. Precision however indicates a major failing of this "majority classification" behaviour. Because so many instances are classified with such little information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced.
+\begin{equation}
+precision(SD) \approx 0.29
+\end{equation}
+\begin{equation}
+precision(\{B, H, Se, W\}) \approx 0.44
+\end{equation}
+\begin{equation}
+recall(SD) \approx 0.79
+\end{equation}
+\begin{equation}
+recall(\{B, H, Se, W\}) \approx 0.16
+\end{equation}
 
-In the context of a geolocation classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geolocation classifer, THE GOAL BRUH WHAT IS IT.
+Note the respective similarities of the precision and recall measures.
+
+In the context of a geo-location classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geo-location classifier, namely positively evaluating classifiers that classify each new instance correctly.
 
 \subsubsection{F-Score}
 F-score is a measure which weighs precision and recall according to the factor $\beta$ to produce a single metric.
-FORMULA
+\begin{equation}
+F_\beta = (1+\beta ^2) \cdot \frac{precision \cdot recall}{precision + recall}
+\end{equation}
 Such a combined metric allows for evaluation that considers both precision and recall without having to compare two separate values. F1 ($\beta = 1.0$) is the most widely used version, indicating the weighted harmonic mean of precision and recall (equal value).
-FORMULA
-For the geolocation classifier in question, precision has previously been indicated as being of greater value. F$_\beta$ "measures the effectiveness of retrieval with respect to a user who attaches $\beta$ times as much importance to recall as precision". Moving forward in evaluation, it seems reasonable to reduce $\beta$ such that precision is more important. Landing on a specific value is difficult; literature for such a pursuit is limited at best. As such, BETA=0.5 is selected, a point between even weighting and pure precision. Ultimately, it is most important that the same $\beta$ is used when comparing F-scores.
+\begin{equation}
+F_1 = 2 \cdot \frac{precision \cdot recall}{precision + recall}
+\end{equation}
+For the geo-location classifier in question, precision has previously been indicated as being of greater value. $F_\beta$ "measures the effectiveness of retrieval with respect to a user who attaches $\beta$ times as much importance to recall as precision"\footnote{\cite{vanrijsbergenc.j.1979} Information Retrieval, Van Rijsbergen}. Moving forward in evaluation, it seems reasonable to reduce $\beta$ such that precision is more important. Landing on a specific value is difficult; literature for such a pursuit is limited at best. As such, $\beta = 0.5$ is selected, a point between even weighting and pure precision.
+\begin{equation}
+F_{0.5} = (1+0.5^2) \cdot \frac{precision \cdot recall}{precision + recall}
+\end{equation}
+Ultimately, it is most important that the same $\beta$ is used when comparing F-scores.
 
-Returning to the San Diego vs rest example for Naive Bayes 446 NAMING TODO, the $F0.5-Score(SD) = 0.33$ and the average of the other classes ROUGHLY EQUALS SIGN 0.33. Here one can see the F-Score working to more accurately indicate performance.
+While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't over-skewing the final evaluation.
 
 
-\subsection{Evaluation of classifier performance using F-Score}
-While class-vs-class information is somewhat lost with this measure, considering the deviation in results is much lower between all classes, this metric allows for reliable classifier-vs-classifier comparison where one rogue class isn't overskewing the final evaluation.
+\subsection{Averaging methods to enable per-classifier evaluation using F-Score}
+Once this per-class metric is acquired, it needs to be applied to the whole classifier. Averaging the result over all the classes is straightforward for binary classification, but in multi-class classification there are multiple methods, two of which are: macro, in which simply the metric for each class is averaged, and micro, in which all individual instance values are pooled and averaged. In macro, small classes have more weight than they would in micro. Such a behaviour could be desirable in classifying for kinds of illnesses, where even if an illness is rare, one still wants to "reward" a model that classifies into the rare illness correctly. In the geo-location classifier the goal isn't to prefer rarer classes. However, macro-averaging will still be used, because "Large classes dominate small classes in microaveraging".\footnote{\cite{vincentvanasch2013} Macro and micro-averaged evaluation measures} This opinion is reinforced by Marina Sokolova and Guy Lapalme: "Macro-averaging treats all classes equally while micro-averaging favors bigger classes".\footnote{\cite{sokolovam.lapalmeg.2009} A systematic analysis of performance measures for classification tasks}
 
-    ESTABLISH BASELINE
+According to George Forman and Martin Scholz\footnote{\cite{formang.scholzm2010} Apples-to-Apples in Cross-Validation Studies: Pitfalls in Classifier Performance Measurement}, micro is generally superior to macro, but they are primarily concerned with instances where researchers are interested in class sizes and weights, which as discussed previously is not applicable here.
+
+Going forward, the per-classifier F-Scores used will be macro-averaged for the inverse effect, so as to not over-weight classes with many instances (namely San Diego). Ultimately, because all classes are similar in size, both methods wouldn't yield enormously different results.
+
+
+\subsection{Application of evaluation framework (F-Score) to several classifiers}
+The feature set used is best446. Given more words, it would be insightful to use the established evaluation methods to compare performance with a differing number of features (namely with best35). This was initially an objective, so results for this have been included in the appendices. As a cursory comment, the F-Score for fewer features is understandably lower. 
+
+\subsubsection{Baselne}
+The baseline used here is Zero-R, in which all test instances are classified into the most common class from the best446 training data-set (San Diego). The results here are understandably terrible. Precision, Recall and F-Score aren't defined (division by 0) for the classes without predictions (all but SD), so are set to 0.00. Recall for SD looks good at 100\%, but is entirely meaningless in this context, while precision is, again, more indicative at 0.26\footnote{See appendix 1 for full Zero-R best446 results}. The baseline is established as the macro-averaged F0.5-Score:
+\begin{equation}
+F_{0.5}Score = \frac{0.00 \cdot 4 + 0.31}{5} \approx 0.33
+\end{equation}
 
 \subsubsection{Naive Bayes}
-
+\begin{equation}
+F_{0.5}Score \approx 0.33
+\end{equation}
 \subsubsection{Support Vector Machine (SVM)}
+\begin{equation}
+F_{0.5}Score \approx 0.33
+\end{equation}
+Note: This is a linear SVC, in which the kernel only attempts to draw straight lines. A more complicated kernel could try polynomials and more.
 
-\subsection{Using more features MAYBE?}
+\subsubsection{Comparison}
+Inconveniently enough, the F-Score for SVM is the same as Naive Bayes given $\beta = 0.5$, making it hard to say which is best based solely on this metric. When $\beta = 1$, Naive Bayes edges out in front (0.29 vs. 0.27). Given this result, additional metrics need to be considered to decide upon which is best. Ultimately this is ideal, since more metrics mean a more well-rounded evaluation.
 
-\subsection{Further evaluative measures/metrics/methods}
-
-\begin{enumerate}
-\item Going to WashingtnFc \textrightarrow Washington DC (Edit distance = 3)
-\end{enumerate}
-
-as well as spelling errors that cross space boundaries:
-
-\begin{enumerate}[resume]
-\item Family visiting from tob oston \textrightarrow Boston (Edit distance = 2)
-\end{enumerate}
-
-To do the former with global edit distance requires examining all the permutations of the tokens in respect to the length of the location being searched for, which diminishes the aforementioned advantages of global edit distance considerably. The latter task is even harder, as adjacent tokens will have to be considered on a per-character basis anyway.
-
-\subsection{TRE library}
-The TRE implementation of local edit distance features a per-search time complexity of $\mathcal{O}(n^2{}m)$, where $m$ is the length of the regex query (location) and $n$ is the length of the string being searched (tweet). While quadratic complexities are generally undesirable, the quadratic factor represents the location which is (usually) quite small compared to the length of the tweet. As such, the quadratic factor won't scale too heavily.
-
-\section{Pre-processing}
-\subsection{Basic operations}
-
-Some basic operations were first performed to clean up the data sets. While these steps involved tokenisation, the actual TRE algorithm did not. The small tweets file was comprised of 65969 words, which by the end of basic pre-processing was trimmed down to about $\simeq$40000 (consider that each tweet had 4 unimportant tokens, the numbers at the start and the datetime at the end).
+\subsection{Runtime}
+Runtime is another important characteristic of a machine learner, so will be briefly treated here. Full results are in a separate text file so the appendices aren't enormous. Most notably, as more features are introduced, each classifier reacts differently:
 
 \begin{enumerate}
-\item Removing unnecessary tokens from tweets, namely the two numbers at the start and the datetime at the end.
-\item Removing punctuation and converting all characters to lower case for both locations and tweets (Twitter users don't capitalise locations consistently enough to utilise it).
-\item For locations, removing tokens that are predominantly numbers and then removing duplicates. In the location set this removes 60158 items (consider all the wells).
-\item Removing locations that are too short (4 chars) or long (70 chars). This removes 26995 items, but has obvious trade-offs in accuracy loss, anoter .
+
+    \item Naive Bayes: Very fast to train and test. Additional features do not increase either by a huge amount.
+    \begin{center}
+    \begin{tabular}{ |c|c|c| } 
+     \hline
+      & \textbf{best35} & \textbf{best446} \\ 
+     \hline 
+     \textbf{Train} & 0.37 sec & 1.12 sec \\ 
+     \textbf{Test} & 3.97 sec & 5.29 sec \\ 
+     \hline
+    \end{tabular}
+    \end{center}
+    
+    \item SVM: Very slow to train. As fast as Naive Bayes to test. Additional features notably increase training time.
+
+    \begin{center}
+    \begin{tabular}{ |c|c|c| } 
+     \hline
+      & \textbf{best35} & \textbf{best446} \\ 
+     \hline 
+     \textbf{Train} & 156.13 sec sec & 306.32 sec \\ 
+     \textbf{Test} & 4.31 sec & 6.79 sec \\ 
+     \hline
+    \end{tabular}
+    \end{center}
+    
+
 \end{enumerate}
 
-The code implemented these steps one by one for demonstration purposes, though many could be done simultaneously in a single pass for improved efficiency.
+Note that effects of increasing features could be emphasised better with a larger difference in the number of features, so these times aren't fully indicative.
 
-More heavy pre-processing steps could be performed taking into account Twitter conventions, for example that \textbf{rt:} means retweet or \textbf{@} precedes a username, which could likely be safely ignored (occasionally a place will have an associated Twitter account).
-
-\subsection{Removal of common words}
-This pre-processing step was tested with mixed results. It involved the following steps:
-
-\begin{enumerate}
-\item Get the standard dictionary of words in UNIX systems from /usr/share/dict/words.
-\item Iterate through the list, removing all locations in US-loc-names.txt from the dictionary. This leaves a dictionary of common words without location names.
-\item Using this dictionary, remove all common words from all tweets, ideally leaving behind only location words.
-\end{enumerate}
-
-This method significantly decreased the number of words in the tweets from $\simeq$40000 (ie. after previous pre-processing) by 33869 to $\simeq$6000.
-
-While it may seem like this would hinder matching of multi-word locations (eg. \textit{Kaby Lake}) because of the common word \textit{lake}, the US-loc-names.txt dictionary actually has many places with names such as \textit{Lake} alone. This prevented such issues from occurring as often as would be expected, making it a surprisingly valid method. Unfortunately, some other examples did suffer due to this procedure, for example removing the token \textit{San} from \textit{San Francisco}. This meant that it would only match on an edit distance of 3 \textit{Francisco}. Nonetheless, the improvement in run time was significant. For the small tweet file and all 1.3 million locations (picking up edit distances from 0-3 inclusive), runtime  with this improvement sat at $\simeq$35 minutes, whereas without it required $\simeq$165 minutes.
-
-\subsection{Inner-word matching}
-Something that turned out to be a much larger problem than expected was the substantial group of false matches where a small location substring (eg. Ash) was found within a larger location (eg. Washington DC). Local edit excels at this task (consider that the previous example is a perfect 0-cost match) which, while often desirable, was frequently annoying in this context. An effective solution was to modify the regex query from /\verb/query// to /\verb/\bquery\b//. While this still found small locations at the start and end of larger locations, it eliminated a large amount of the problematic cases. This is obviously in exchange for a loss in accuracy, another noteworthy performance metric, as some (very small) amount of correct matches would be missed.
-
-\section{Precision analysis}
-In analysing the performance of the algorithm, precision\footnote{ precision is defined in terms of $Correct Matches/Number of Matches$.} is primarily considered. A measure such as recall is unfeasible to calculate due to the enormous amount of manual work required to find all misspelled locations. Accuracy has been previously touched on.
-
-\subsection{Precision metric}
- The notion of a correct match is difficult to define. An algorithm such as this cannot intuitively tell whether a match is truly correct. Indeed, as far as the algorithm is concerned, each one of these matches \textbf{is} correct because it is within the given edit distance of one of the locations in the dictionary. As such, the following precision measures were ascertained by selecting a random subset of all the matches and deciding whether the matched location is what the user intended, for example \textit{Berkley} \textrightarrow \textit{Berkeley}, or not, for example \textit{Coupon} \textrightarrow \textit{Boston}. (Note also that calculating recall is effectively unfeasible due to the enormous amount of manual work required to find all misspelled locations in question).
-
-\subsection{Results}
-As expected, there are an enormous amount of false positives (incorrect matches). Inversely, at least by manual inspection there seem to be very few missed mistakes. This makes sense because the results capture so many variations with an edit distance of even 2, let alone 3. The vast amount of false positives are a result of a couple of factors, namely the huge amount of location names, especially small ones. More aggressive culling of small location names could be a way around this error, as well as a more sophisticated approach to the removal of common words.
-
-A function was written which produces 200 random matches at a given edit distance. These are manually-verified precision measures for said 200 tweets at edit distances of 1-3 (files for which are included with the code):
-
-\begin{enumerate}
-\item 6\% (12/200)
-\item 2\% (2/200)
-\item 0\% (0/200)
-\end{enumerate}
-
-We see that as we increase edit distance, precision goes down. These results are to be expected (though to be taken cautiously over such a small sample size), as with each increase in the edit distance a far greater range of locations could match, the vast majority of which won't be correct matches, especially considering the wide range of cases that local edit distance handles better than other algorithms.
+\subsection{Confusion matrices}
+\includegraphics[width=0.5\textwidth]{confMatrixNB446Fixed}
+\includegraphics[width=0.5\textwidth]{confMatrixSVM446Fixed}
+There are two main observations to be made about this graphic. Firstly, both of these confusion matrices demonstrate clearly the strong selection bias towards San Diego discussed earlier. Secondly, in a confusion matrix, strong top-left to bottom-right diagonals  represent good classifier performance. While difficult to tell (and both are fairly poor), Naive Bayes does appear to have a stronger general diagonal than SVM.
 
 \section{Conclusion}
-It goes without saying that the vast majority of potential spelling corrections that these algorithms find are not what the user had in mind. A good few steps towards improving these would be to aggressively cut down the locations dictionary down to the most commonly talked-about places, as well as more intelligent elimination of non-location words from the tweets in question. Real improvements would ideally come from more complicated technologies such as natural language processing, in which the algorithm could understand where a location is most likely to appear in a tweet, if at all. Anything that can bring the computer closer to attaining wisdom/understanding will be essential in the face of such a computationally enormous task.
+Evaluating evaluation itself is difficult, but it can be conceded that F-Score, the focus of this report, isn't perfect. There are many different ways to parameterise or average even this one metric, let alone the others available. None of the metrics considered use true negatives, in which the classifier correctly says what an instance is \textbf{not}. Specificity is such a measure, and could be interesting in further study. Methods like (AU)ROC could be interesting also; a graphical approach is attractive when demonstrating functionality of a machine learner, though often not very conclusive as seen in the confusion matrices. While it's hard to decide upon a "winner", according to the evaluation metrics and methods explored here Naive Bayes is better than SVM, considering that it ties $F_{0.5}Score$ and wins based on runtime and a visual inspection of confusion matrices. Given resources, the best way to approach evaluating a classifier is to look at \textit{all} the metrics available and consider each as they merit.
 
+\hfill \break
 
+\noindent Word Count: 1315 (within 10%).
+
+\vfill\eject
 \printbibliography
+\clearpage
+\section{Appendices}
+\subsection{Appendix 1: Results from different classifiers and data-sets}
+Not all results are included here, only those referenced in the report. See allResults.txt for best35 and best446 results printouts for Naive Bayes and SVM.
+\subsubsection{Zero-R Best 446}
+\begin{verbatim}
+     precision  recall  f0.50   support
+ B   0.00       0.00    0.00    12061
+ H   0.00       0.00    0.00    12578
+SD   0.26       1.00    0.31    17929
+Se   0.00       0.00    0.00    14482
+ W   0.00       0.00    0.00    11482
+
+avg  0.05       0.20    0.06    68532
+
+Time taken to train the model: 4.76 sec
+Time taken to test the model: 1.25 sec
+\end{verbatim}
+\subsubsection{Naive Bayes Best 446}
+\begin{verbatim}
+     precision  recall  f0.50   support
+ B   0.44       0.10    0.27    12061
+ H   0.44       0.16    0.33    12578
+SD   0.29       0.79    0.33    17929
+Se   0.37       0.19    0.31    14482
+ W   0.51       0.20    0.39    11482
+
+avg  0.41       0.29    0.33    68532
+
+Time taken to train the model: 4.94 sec
+Time taken to test the model: 6.21 sec
+\end{verbatim}
+\vfill\eject
+\subsubsection{SVM Best 446}
+\begin{verbatim}
+     precision  recall  f0.50   support
+ B   0.61       0.09    0.29    12061
+ H   0.44       0.15    0.32    12578
+SD   0.29       0.90    0.33    17929
+Se   0.69       0.09    0.30    14482
+ W   0.54       0.19    0.40    11482
+
+avg  0.51       0.29    0.33    68532
+
+Time taken to train the model: 306.32 sec
+Time taken to test the model: 6.79 sec
+\end{verbatim}
+
+\subsection{Appendix 2: Short comment on topics not covered by this report}
+This report is not concerned with the bias-variance trade-off, nor with feature engineering. As such, data is segmented according to the holdout method as per the given data-sets best35 and best446 \footnote{Feature selection thanks to Jeremy Nicholson}. As a shallow comment, bias will have been reduced in the 446 data-set vs. the 35 data-set due to a greater breadth of features with which instances are classified. Considering that there are potentially hundreds of thousands of features in the full data-set, a small selection such as 446 should hopefully not introduce too much variance. There is not much that can be done about noise, namely tweets in which the content is not related to the user's location. Tweets \textit{could} be grouped based on user ID to help decide on location, but this is not the objective of this report.
 
 \end{document}

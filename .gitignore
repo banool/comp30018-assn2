@@ -3,3 +3,4 @@ tweets/
 best446/
 predicted.csv
 *.p
+__pycache__/
