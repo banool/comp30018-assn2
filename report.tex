@@ -106,7 +106,7 @@ The feature set used is best446. Given more words, it would be insightful to use
 \subsubsection{Baselne}
 The baseline used here is Zero-R, in which all test instances are classified into the most common class from the best446 training data-set (San Diego). The results here are understandably terrible. Precision, Recall and F-Score aren't defined (division by 0) for the classes without predictions (all but SD), so are set to 0.00. Recall for SD looks good at 100\%, but is entirely meaningless in this context, while precision is, again, more indicative at 0.26\footnote{See appendix 1 for full Zero-R best446 results}. The baseline is established as the macro-averaged F0.5-Score:
 \begin{equation}
-F_{0.5}Score = \frac{0.00 \cdot 4 + 0.31}{5} \approx 0.33
+F_{0.5}Score = \frac{0.00 \cdot 4 + 0.31}{5} \approx 0.06
 \end{equation}
 
 \subsubsection{Naive Bayes}
