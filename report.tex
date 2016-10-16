@@ -53,7 +53,7 @@ In the context of our geo-location classifier, precision and recall are frequent
     - Subset of results for Naive Bayes 
       on best446
 \end{verbatim}
-
+\clearpage
 These results demonstrate the inverse relationship between precision and recall in this context. By considering just these two metrics, it's clear that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes, and other similar classifiers. When the classifier comes across a new test instance for which it has little to no information (e.g. where the feature vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929\footnote{Full results for Naive Bayes on best446 in Appendix 1}. This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected.
 
 With recall as the only metric, it looks like Naive Bayes is an incredible classifier for the SD class. Precision however indicates a major failing of this "majority classification" behaviour. Because so many instances are classified with such little information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision is also inversely skewed by bias towards the majority class, but this effect is not as pronounced.
@@ -118,7 +118,7 @@ F_{0.5}Score \approx 0.33
 F_{0.5}Score \approx 0.33
 \end{equation}
 Note: This is a linear SVC, in which the kernel only attempts to draw straight lines. A more complicated kernel could try polynomials and more.
-
+\clearpage
 \subsubsection{Comparison}
 Inconveniently enough, the F-Score for SVM is the same as Naive Bayes given $\beta = 0.5$, making it hard to say which is best based solely on this metric. When $\beta = 1$, Naive Bayes edges out in front (0.29 vs. 0.27). Given this result, additional metrics need to be considered to decide upon which is best. Ultimately this is ideal, since more metrics mean a more well-rounded evaluation.
 
