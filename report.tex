@@ -15,7 +15,7 @@ sorting=ynt
 ]{biblatex}
 
 \title{COMP30018 Knowledge Technologies \\ \large Assessing evaluative metrics for effectively comparing classifiers}
-\author{Daniel Porteous 696965}
+\author{Anonymous}
 \date{October 2016}
 
 \addbibresource{bib.bib}
@@ -30,7 +30,7 @@ The aim of this report is not strictly to compare classifiers, but to consider e
 \section{Evaluation}
 \subsection{Evaluative metrics}
 \subsubsection{Precision and Recall}
-The two main evaluative metrics used are precision and recall. Precision is\footnote{\newline TP: True positive \,\,\,Correctly identified\newline FP: False positive \,\,\,Incorrectly identified\newline TN: True negative \,\hspace{0.1em}Correctly rejected\newline FN: False negative\, Incorrectly rejected} 
+The two main evaluative metrics used are precision and recall. Precision is
 \begin{equation}
 \frac{TP}{TP+FP}
 \end{equation}
@@ -39,7 +39,7 @@ which indicates what proportion of the retrieved instances are relevant. Recall 
 \frac{TP}{TP+FN}
 \end{equation}
 which indicates what proportion of relevant instances are retrieved.
-\clearpage
+
 In the context of our geo-location classifier, precision and recall are frequently inversely related. This is best demonstrated by looking at the performance of a classifier on two classes.
 \begin{verbatim}
              precision    recall
@@ -54,9 +54,9 @@ In the context of our geo-location classifier, precision and recall are frequent
       on best446
 \end{verbatim}
 
-These results demonstrate clearly the inverse relationship between precision and recall in this context. By considering just these two metrics, it's clear that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes, and other similar classifiers. When the classifier comes across a new test instance for which it has little to no information (e.g. where the vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929\footnote{Full results for Naive Bayes on best446 in Appendix 1}. This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected. 
+These results demonstrate the inverse relationship between precision and recall in this context. By considering just these two metrics, it's clear that San Diego (SD) stands in contrast to the other classes. This highlights a key behaviour of Naive Bayes, and other similar classifiers. When the classifier comes across a new test instance for which it has little to no information (e.g. where the feature vector is all 0s because none of the selected features are present), the most reasonable choice it can make is to classify it into the most common class from the training data. If there were 10 apples and 1 orange, it seems reasonable to treat an unknown test instance as an apple. SD is the apple class in this case (with the most training instances at 17929\footnote{Full results for Naive Bayes on best446 in Appendix 1}. This most clearly explains the extremely high recall of 79\%. Because the classifier is most likely to classify an instance as SD, most of the relevant SD instances are selected.
 
-With recall as the only metric, it looks like Naive Bayes is an incredible classifier for the SD class. Precision however indicates a major failing of this "majority classification" behaviour. Because so many instances are classified with such little information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision suffers from bias towards the majority class also, but this effect is not as pronounced.
+With recall as the only metric, it looks like Naive Bayes is an incredible classifier for the SD class. Precision however indicates a major failing of this "majority classification" behaviour. Because so many instances are classified with such little information into SD, it is hardly surprising that 71\% of them were incorrectly classified as such. Precision is also inversely skewed by bias towards the majority class, but this effect is not as pronounced.
 \begin{equation}
 precision(SD) \approx 0.29
 \end{equation}
@@ -72,7 +72,7 @@ recall(\{B, H, Se, W\}) \approx 0.16
 
 Note the respective similarities of the precision and recall measures.
 
-In the context of a geo-location classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geo-location classifier, namely positively evaluating classifiers that classify each new instance correctly.
+In the context of a geo-location classifier, this analysis provides an evaluative paradigm going forward, namely that precision should considered before recall. While selecting as many correct instances as possible is a desirable goal, it is more important that each new instance is classified correctly as often as possible. The other classes demonstrate such a trade off, where lower recall comes with improved precision. This balance resonates with the initial goal of the geo-location classifier, namely positively evaluating classifiers that predict each new instance correctly.
 
 \subsubsection{F-Score}
 F-score is a measure which weighs precision and recall according to the factor $\beta$ to produce a single metric.
@@ -123,7 +123,7 @@ Note: This is a linear SVC, in which the kernel only attempts to draw straight l
 Inconveniently enough, the F-Score for SVM is the same as Naive Bayes given $\beta = 0.5$, making it hard to say which is best based solely on this metric. When $\beta = 1$, Naive Bayes edges out in front (0.29 vs. 0.27). Given this result, additional metrics need to be considered to decide upon which is best. Ultimately this is ideal, since more metrics mean a more well-rounded evaluation.
 
 \subsection{Runtime}
-Runtime is another important characteristic of a machine learner, so will be briefly treated here. Full results are in a separate text file so the appendices aren't enormous. Most notably, as more features are introduced, each classifier reacts differently:
+Runtime is another important characteristic of a machine learner, so will be briefly treated here. Best35 results are in a separate text file so the appendices aren't enormous. Most notably, as more features are introduced, each classifier reacts differently:
 
 \begin{enumerate}
 
@@ -167,7 +167,7 @@ Evaluating evaluation itself is difficult, but it can be conceded that F-Score, 
 
 \hfill \break
 
-\noindent Word Count: 1315 (within 10%).
+\noindent Word Count: 1315 (within 10\%).
 
 \vfill\eject
 \printbibliography
