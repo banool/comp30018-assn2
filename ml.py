@@ -270,7 +270,8 @@ def trainAndEvaluate(trainDataFile, devDataFile, classifier, average):
 from sys import argv, exit
 
 def printUsage():
-    print("Usage: {} [data_set] [classifier] <average_type>".format(argv[0]))
+    print("Usage:   {} [data_set] [classifier] <average_type>".format(argv[0]))
+    print("Example: {} 35 nb".format(argv[0]))
 
 if __name__ == "__main__":
     if len(argv) >= 3:
