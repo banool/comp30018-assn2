@@ -30,3 +30,9 @@ Source here: https://goo.gl/XwMr6N
 Predictions have been included for the four primary datasets considered. If
 marking requires only one set, use predictedNB446test, as it has the best
 results. These are of course for the test data, not the dev data.
+
+## Results
+
+Final result: 14.5/15
+
+Critical analysis: 6.5/7 || Technical Tasks: 1/1 || Creativity: 1/1 || Report quality: 3/3 || Reviews: 3/3
